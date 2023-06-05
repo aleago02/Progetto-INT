@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <title>Grafico</title>
+</head>
+<body>
+    <div>
+        <h1>Grafico</h1>
+        <div id="chart"></div>
+    </div>
+    <button onclick="window.location.href='http://localhost:8001/table'">Cambia dato</button>
+    <p>Clicca <a href="/{{name}}-Previsione">qui</a> se vuoi provare a prevedere l'andamento del grafico nei prossimi giorni</p>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+        var graphs = {{graphJSON | safe}};
+        Plotly.plot('chart', graphs, {});
+    </script>
+</body>
+</html>

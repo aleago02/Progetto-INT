@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = "css/style.css") }}"/>
+    <title>Grafico</title>
+</head>
+<body>
+    <div>
+        <h1>Previsione - utilizzando la Regressione Lineare</h1>
+        <section>
+            <h2>Che cosè la rigressione lineare ?</h2>
+            <p>Il modello di rigressione lineare è un modello di Machine Learning supervisionato che cerca di trovare la migliore relazione lineare possibile tra le features di input (X) e la variabile target (Y)</p>
+        </section>
+        <section>
+            <h3>Rimoviamo i duplicati</h3>
+            <p>L'identificazione e la rimozione dei duplicati migliorerà la qualità dei dati per l'analisi, il che porterà a una maggiore precisione.(data length (n. rows) - data length senza duplicati)</p>
+            <div class = "code">
+                duplicate_count = len(data)-len(data.drop_duplicates())
+
+                    duplicate_count
+            </div>
+            <p>Rimuovere i duplicati dal dataset. Sovrascrivere il dataframe di data.</p>
+            <div class = "code">
+                data.drop_duplicates(inplace=True)
+            </div>
+        </section>
+        <section>
+            <h3>Dati mancanti</h3>
+            <p>Rappresentanze comuni:</p>
+            <ul>
+                <li>NaN (not a number)</li>
+                <li>Large negatives (-99,-999)</li>
+                <li>?</li>
+                <li>Infinity</li>
+            </ul>
+            <p>Opzioni principali per gestire i valori mancanti:</p>
+            <ol>
+                <li>Eliminare completamente la colonna</li>
+                <li>Preservare i NaN e sostituirli con valori significativi</li>
+            </ol>
+            <p>controllo se ho dati nulli e le sostituisco nel caso</p>
+            <div class = "code">
+                data.isnull().sum().sort_values(ascending=False)
+                    data["row"].replace(np.nan, "NoValue", inplace=True) 
+                
+            </div>
+        </section>
+        <section>
+            <h3>Creare X (features) e Y (traget)</h3>
+            <p>Creare 2 variabili per X e y. Ricorda che X è la feature (s) e y il target.</p>
+            <div class="code">
+                X = data.drop(columns=['{{name}}'])
+                    y = data['{{name}}']
+            </div>
+        </section>
+        <section>
+            <h3>Cross-Validation</h3>
+            <p>Cross-validation è una tecnica per valutare un modello di Machine Learning e testarne le prestazioni dividendo i dati in due segmenti: uno utilizzato per apprendere o addestrare un modello e l'altro utilizzato per convalidare il modello.</p>
+            <p>Queste sono le operazioni:</p>
+            <ol>
+                <li>Dividere il set di dati in due parti: una per la formazione, l'altra per il test</li>
+                <li>Eseguire il training del modello sul set di training</li>
+                <li>Convalidare il modello nel set di test</li>
+            </ol>
+            <p>1. Dividere il set di dati in due parti: il set di training e il set di test. Di solito, il 70/80% del set di dati va al set di addestramento e il 20/30% al set di test</p>
+            <div class="code">
+                X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2,random_state=0)
+            </div>
+            <p>2. Eseguire il training del modello sul set di training</p>
+            <div class="code">
+                model = LinearRegression()
+                    model.fit(X_train, y_train)
+            </div>
+            <p>3. Convalidare il modello nel set di test</p>
+            <div class="code">
+                test_pre = model.predict(X_test)
+            </div>
+            <p>R2_score da una indicazione della bonta del nostro modello</p>
+            <div class="code">
+                test_score = r2_score(y_test, test_pre)
+            </div>
+            <p>Il nostro modello è accurato al {{testScore}} %</p>
+        </section>
+        <h3>Grafico con dati reali(y) e dati previsti(x)</h3>
+    <div id="chart"></div>
+    </div>
+    <button onclick="window.location.href='http://localhost:8001/table'">Cambia dato</button>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+        var graphs = {{graphJSON | safe}};
+        Plotly.plot('chart', graphs, {});
+    </script>
+</body>
+</html>

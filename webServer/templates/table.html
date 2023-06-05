@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = "css/style.css") }}"/>
+    <title>Table</title>
+</head>
+<body>
+    <div>
+        <h1>Database</h1>
+        <div>
+            <p id="table">Questi sono solo le prime dieci truple del database in totale gli elementi sono :</p> <div class="numero">{{number}}</div>      
+        </div>
+        <table id= "userdata">
+            <thead>
+                <tr>
+                <th><p>Station</p></th>
+                <th><p>Date</p></th>
+                <th><a href="/MaxT">MaxT</a></th>
+                <th><a href="/MinT">MinT</a></th>
+                <th><a href="/RH1">RH1</a></th>
+                <th><a href="/RH2">RH2</a></th>
+                <th><a href="/Wind">Wind</a></th>
+                <th><a href="/Rain">Rain</a></th>
+                </tr>
+            </thead>
+            <tbody id="dati">
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}">
+    </script>
+</body>
+</html>

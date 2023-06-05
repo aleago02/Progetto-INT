@@ -1,0 +1,83 @@
+h1 {
+    font-size: 58px;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    margin-left: 30%;
+    margin-right: 30%;
+    text-align: center;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+h3 {
+    font-size: 22px
+}
+
+p{
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.button { 
+    margin-top: 16%;
+    width: 47%;
+    float: right;
+}
+
+img#diagramma {
+    width: 31%;
+    height: 61%;
+    margin-left: 18%;
+}
+
+img{
+    width: 12%;
+    height: 61%;
+    margin-left: 18%; 
+}
+
+th { 
+    text-align: center;
+    border: medium solid;
+    padding: 5px;
+    font-size: 20px;
+}
+
+td { 
+    text-align: center;
+    border: medium solid;
+    padding: 5px;
+}
+
+table {
+    border: medium solid;
+    border-collapse: collapse;
+    margin-left: auto;
+    padding: 10px;
+    margin-right: auto;
+    margin-top: 35px;
+
+}
+
+.numero {
+
+    display: inline;
+    font-size: 25px;
+    padding-left: 20px;
+    font-family: monospace;
+    color: brown;
+
+}
+
+#table{ 
+    display: inline;
+    font-size: 23px;
+}
+
+.code{
+    color: green;
+    font-family: monospace;
+}
+
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = "css/style.css") }}" />
+</head>
+<body>
+    <article>
+        
+        <h1>PROGETTO</h1>
+        <p>Implementazione di un server che si connette a un database (Mysql - mariaDB), legge dei dati da un sensore collegato ad un ESP8266 e li invia al server che li carica nel database.</p>
+        <img id="diagramma" src="{{ url_for('static', filename = "resource/diagramma.png") }}" alt="diagramma progetto">
+        <div class="button">
+            <button onclick="window.location.href = 'http://localhost:8001/table';">Valori DB</button>
+        </div>
+        <p>I valori presenti sul data base sono stati prelevati da <a href="https://www.kaggle.com/">kaggle</a> sotto forma di XLSX per poi essere convertiti in SQL e inseriti all'interno del database chaimato ICRISAT</p>
+        <section>
+            <h2>Informazioni sul set di dati</h2>
+            <p>L'International Crops Research Institute for the Semi-Arid Tropics (ICRISAT) è un'organizzazione internazionale senza scopo di lucro che intraprende ricerca scientifica per lo sviluppo, con sede a Patancheru (Hyderabad, Telangana, India) con diversi centri regionali (Bamako (Mali), Nairobi (Kenya) e stazioni di ricerca (Niamey (Niger), Kano (Nigeria), Lilongwe (Malawi), Addis Abeba (Etiopia), Bulawayo (Zimbabwe). È stata fondata nel 1972 da un consorzio di organizzazioni convocate dalle fondazioni Ford e Rockefeller. La sua carta è stata firmata dalla FAO e dall'UNDP. Fin dalla sua istituzione, il paese ospitante, l'India, ha concesso uno status speciale all'ICRISAT come organizzazione delle Nazioni Unite che opera nel territorio indiano, rendendolo idoneo a speciali immunità e privilegi fiscali.</p>
+        </section>
+        <section>
+            <h2>Organizzazione del server</h2>
+            <p>Sono stati implementati due webSever, uno su ESP8266 per la gestione di nuove connessione WiFi e per la ricerca di altri host all'interno della stessa rete, un' altro webServer con l'uso di Flask per la gestione del database e la navigazione all'interno dell'applicazione.</p>
+        </section>
+        <section>
+            <h2>Organizzazione del database</h2>
+            <p>Il database è composto da una singola tabella 'sheet1' che contiene le seguenti colonne:</p>
+            <ol>
+                <li>Station => Stazione da cui vengono letti i dati;</li>
+                <li>Date => Giorno della lettura;</li>
+                <li>MaxT => Temperatura massima giornaliera;</li>
+                <li>MinT => Temperatura minima giornaliera;</li>
+                <li>RH1 => Umidità relativa mattutina;</li>
+                <li>RH2 = > Umidità relativa pomeridiana;</li>
+                <li>Wind => Vento (km/h);</li>
+                <li>Rain => Pioggia (mm);</li>
+            </ol>
+        </section>
+        <section>
+            <h2>ESP8266</h2>
+            <p>ESP8266 è un dispositivo pensato per l'IOT, integra un'interfaccia di rete WIFI, un microprocessore, RAM e diverse interfaccie di I/O.</p>
+        </section> 
+        <section>
+            <h2>DH11</h2>
+            <p>Il DHT11 è un sensore digitale di umidità e temperatura dell'aria costituito da una parte resistiva che si occupa della rilevazione dell'umidità e da un NTC che rileva la temperatura, queste due parti sono gestite da un microcontrollore che è parte integrante del sensore. Il DHT 11 viene pre-calibrato in fabbrica e i dati di calibrazione vengono memorizzati all'interno di una memoria di sola lettura (OPT Memory).</p>
+            <h3>Caratteristiche del sensore</h3>
+            <ol>
+                <li><b>Intervallo di temperatura:</b>da 0 a 50 ºC +/-2 ºC</li>
+                <li><b>Intervallo di umidità:</b>da 20 a 90% +/-5%</li>
+                <li><b>Risoluzione:</b>
+                    <ol>
+                        <li>Umidità: 1%</li>
+                        <li>Temperatura: 1ºC</li>
+                    </ol>
+                </li>
+                <li><b>Tensione di alimentazione:</b>3 - 5.5 V DC</li>
+                <li><b>Corrente assorbita:</b> 0.5 - 2.5 mA</li>
+                <li><b>Periodo di campionamento:</b>1 sec</li>
+            </ol>
+            <p>Le dimensioni ridotte, il basso consumo energetico e la possibilità di trasmettere il segnale su cavo fino a 20 metri lo rendono interessante per diverse applicazioni sia in campo hobbistico che semiprofessionale.
+                Quando la lunghezza del cavo di collegamento è inferiore a 20 metri è consigliabile inserire una resistenza di pull-up da 4,7 Kohm sulla linea dati (pin 2).
+                Il sensore può essere acquistato in due configurazioni:
+                Componente singolo a 4 pin su stessa linea
+            </p>
+            <img src="{{ url_for('static', filename = "resource/componente.jpg") }}" alt="Componente singolo a 4 pin su stessa linea">
+            <p>Componente montato su breakout board a 3 pin (in questo caso la resistenza di pull-up interna sul pin 2 è già presente)</p>
+            <img src="{{ url_for('static', filename = "resource/componenteBoard.jpg") }}" alt="Componente montato su breakout board a 3 pin">
+        </section> 
+        <section>
+            <h2>Modalità di comunicazione</h2>
+            <p>La lettura dei dati rilevati dal sensore può avvenire solo dopo un tempo di 1 secondo dall'atto dell'accensione del sensore.
+                La comunicazione con il sensore avviene utilizzando una connessione seriale che utilizza un solo filo (Single-Wire Two-Way). Il pacchetto informativo che include i dati di temperatura ed umidità inviati dal sensore ha una lunghezza di 40 bit ed una durata di 4 ms.
+                Il DHT11 quando alimentato si pone in una modalità a basso consumo. Quando il microcontrollore invia un segnale di start, il DHT11 passa dalla modalità a basso consumo alla modalità di funzionamento nell'attesa che il Microcontrollore completi la fase di avvio. Completata la fase di avvio il sensore invia un pacchetto informativo di risposta al microcontrollore costituito da 40 bit al cui interno si trovano le informazioni relative a umidità e temperatura rilevate. Senza il segnale di start proveniente dal microcontrollore il DHT11 non fornirà mai i dati. Conclusa la fase di invio dati il DHT11 ritorna in una modalità a basso consumo fino a quando non rileva un nuovo segnale di start proveniente dal microcontrollore.
+            </p>
+        </section>
+        <section>
+            <h2>Schema di collegamento</h2>
+            <img src="{{ url_for('static', filename = "resource/schema.jpg") }}" alt="Schema di collegamento">
+            <p>Per poter utilizzare il sensore è indispensabile utilizzare una libreria specifica, utilizzeremo la libreria DHT di Adafruit</p>
+        </section>
+        <section>
+            <h2>PROTOCOLLO MQTT</h2>
+            <p>Per la comunicazione tra ESP8266 e server abbiamo utilizzato il protocollo Mqtt, che utilizza un broker pubblico, emqx. Il protocollo Mqtt è più leggero rispetto al protocollo Http che prevede l'invio di molti bytes e quindi più adatto per la comunicazione macchina-macchina.</p>
+        </section>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}"></script>
+</body>
+</html>
