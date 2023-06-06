@@ -42,7 +42,11 @@ class LSTMnetwork(nn.Module):
         Returns:
             torch.Tensor: Tensore di output.
         """
-        sequence = torch.from_numpy(sequence)
+        sequence = np.float32(sequence)
+        sequence = torch.tensor(sequence)
+        print(sequence.view(len(sequence), 1, -1))
+
+        print(self.hidden)
         lstm_out, self.hidden = self.lstm(sequence.view(len(sequence), 1, -1), self.hidden)
         prediction = self.linear( lstm_out.view( len(sequence), -1 ) )
         

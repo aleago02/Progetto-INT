@@ -89,7 +89,7 @@ class NetRunner():
                                     torch.zeros(1, 1, self.net.hidden_size))
                     
                     # Eseguo la predizione sulla sequeneza col modello
-                    window_predictions = self.net(window_data)
+                    window_predictions = self.net(torch.from_numpy(window_data))
                     
                     # Calcolo la loss ed eseguo la back-propagation
                     loss = self.criterion(window_predictions, windows_labels)
