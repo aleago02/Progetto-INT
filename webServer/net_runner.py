@@ -28,7 +28,7 @@ class NetRunner():
         self.test_size = 12
         # Inizializzo lo scaler che usero' per preprocessare il dataset.
         self.scaler = MinMaxScaler(feature_range=(-1, 1))
-        self.epochs = 200
+        self.epochs = 2
         self.SQL = SQL
         self.name = name
         self.load_data()
@@ -52,21 +52,21 @@ class NetRunner():
 
         train_set, test_set = y[ : -self.test_size], y[-self.test_size : ]
         # Normalizzazione dei dati.
-        train_norm = scaler.fit_transform(train_set.reshape(-1, 1))
-        test_norm = scaler.transform(test_set.reshape(-1, 1))
+        self.train_norm = scaler.fit_transform(train_set.reshape(-1, 1))
+        self.test_norm = scaler.transform(test_set.reshape(-1, 1))
 
         # Conversione in tensori.
-        self.train_norm = torch.FloatTensor(train_norm).view(-1)
-        self.test_norm = torch.FloatTensor(test_norm).view(-1)
+        self.train_norm = torch.FloatTensor(self.train_norm).view(-1)
+        self.test_norm = torch.FloatTensor(self.test_norm).view(-1)
 
         # Crea le coppie dati per l'addestramento: <finestra valore, prossimo valore atteso>
         self.train_data = []
-        for i in range(len(train_norm) - self.window_size):
-            windowed_data = train_norm[i : i + self.window_size]
-            windowed_labels = train_norm[i + self.window_size : i + self.window_size + 1]
+        for i in range(len(self.train_norm) - self.window_size):
+            windowed_data = self.train_norm[i : i + self.window_size]
+            windowed_labels = self.train_norm[i + self.window_size : i + self.window_size + 1]
             self.train_data.append((windowed_data, windowed_labels))
             
-        print(f'Sequence length --> training: {len(train_norm)}, test: {len(test_norm)}')
+        print(f'Sequence length --> training: {len(self.train_norm)}, test: {len(self.test_norm)}')
         print(f'Training data length: {len(self.train_data)} with windows size of {self.window_size}')
 
     def fit(self):
@@ -89,8 +89,9 @@ class NetRunner():
                                     torch.zeros(1, 1, self.net.hidden_size))
                     
                     # Eseguo la predizione sulla sequeneza col modello
-                    window_predictions = self.net(torch.from_numpy(window_data))
+                    window_predictions = self.net(window_data)
                     
+        
                     # Calcolo la loss ed eseguo la back-propagation
                     loss = self.criterion(window_predictions, windows_labels)
                     loss.backward()
@@ -124,6 +125,12 @@ class NetRunner():
 
                 if min_va_loss > loss_va:
                     min_va_loss = loss_va
+
+    
+                # Stampo:
+                # - la loss ottenuta alla fine di ogni epoca sui dati di training    
+                # - la loss ottenuta alla fine di ogni epoca sui dati di test    
+                print(f'Epoch: {epoch:2} Loss: {loss.item():10.8f} --- Loss_va: {loss_va.item():10.8f} {"*** Upgraded ***" if upgraded else ""}')
 
             # Applico l'inverse scaler per tornare ai valori originali
             true_predictions = self.scaler.inverse_transform(np.array(test_predictions[self.window_size:]).reshape(-1, 1))
