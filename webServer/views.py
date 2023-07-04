@@ -218,10 +218,12 @@ def get_table():
 def MaxTP():
     name = 'MaxT'
     # graphJSON, testScore=get_previsione("SELECT Date, MaxT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
+    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 ", name)
     graphJSON=runner.fit()
 
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = 10, name=name)
+    return redirect('http://localhost:6006')
+
+    # return render_template("previsione.html", graphJSON = graphJSON,testScore = 10, name=name)
 
 @views.route("/MinT-Previsione")
 def MinTP():

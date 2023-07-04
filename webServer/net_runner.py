@@ -14,6 +14,7 @@ from net import LSTMnetwork
 from datetime import datetime
 from sklearn.preprocessing import MinMaxScaler
 import datetime as dt
+from torch.utils.tensorboard import SummaryWriter
 
 
 class NetRunner():
@@ -31,6 +32,8 @@ class NetRunner():
         self.epochs = 2
         self.SQL = SQL
         self.name = name
+        run_name = f'rnn_{datetime.fromtimestamp(time.time()).strftime("%d-%m-%Y_%H-%M")}'
+        self.writer = SummaryWriter(f'runs/{run_name}')
         self.load_data()
   
     def load_data(self):
@@ -41,19 +44,17 @@ class NetRunner():
         for result in cursor.fetchall():
             json_data.append(dict(zip(row_headers, result)))
         #print(json_data)
-        data = pd.DataFrame(json_data)
-        data['Date'] = pd.to_datetime(data['Date'])
-        data['Date']=data['Date'].map(dt.datetime.toordinal)
+        self.data = pd.DataFrame(json_data)
+        self.data['Date'] = pd.to_datetime(self.data['Date'])
+        self.data['Date']=self.data['Date'].map(dt.datetime.toordinal)
 
-        # Inizializzo lo scaler che usero' per preprocessare il dataset.
-        scaler = MinMaxScaler(feature_range=(-1, 1))
 
-        y = data[self.name].to_numpy()
+        y = self.data[self.name].to_numpy()
 
         train_set, test_set = y[ : -self.test_size], y[-self.test_size : ]
         # Normalizzazione dei dati.
-        self.train_norm = scaler.fit_transform(train_set.reshape(-1, 1))
-        self.test_norm = scaler.transform(test_set.reshape(-1, 1))
+        self.train_norm = self.scaler.fit_transform(train_set.reshape(-1, 1))
+        self.test_norm = self.scaler.transform(test_set.reshape(-1, 1))
 
         # Conversione in tensori.
         self.train_norm = torch.FloatTensor(self.train_norm).view(-1)
@@ -134,17 +135,40 @@ class NetRunner():
 
             # Applico l'inverse scaler per tornare ai valori originali
             true_predictions = self.scaler.inverse_transform(np.array(test_predictions[self.window_size:]).reshape(-1, 1))
-
-            return self.plot_full_data_predictions(true_predictions, epoch)
+        
+            self.plot_full_data_predictions(true_predictions, epoch)
 
     def plot_full_data_predictions(self, predictions : np.ndarray, epoch : int):
         # Args:
         #     predictions (np.ndarray): Predizioni.
-        #     epoch (int): Epoca associata al plot.
-        x = np.arange('2018-02-01', '2019-02-01', dtype='datetime64[M]').astype('datetime64[D]')
         
-        fig = px.line(x, x="Date", y=predictions, title='Andamento {0} durante gli anni'.format(predictions))
-        #  converte una stringa  in json
-        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        # fig = px.line(x="Date", y=predictions, title='Andamento {0} durante gli anni'.format(predictions))
+        # #  converte una stringa  in json
+        # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
         
-        return graphJSON
+        # return graphJSON
+
+        x = np.arange('1986-02-01', '1987-02-01', dtype='datetime64[M]').astype('datetime64[D]')
+        
+        self.fig = plt.figure(figsize=(12,4))
+        plt.title('Alcohol Sales')
+        plt.ylabel('Sales in million dollars')
+        plt.grid(True)
+        plt.autoscale(axis='x',tight=True)
+        plt.plot(self.data['MaxT'], color='#8000ff')
+        plt.plot(x, predictions, color='#ff8000')
+
+        self.plot_to_tensorboard('Zoomed Alcohol Sales Prediction', epoch)
+    
+    def plot_to_tensorboard(self, prefix : str, epoch : int) -> None:
+        
+        """
+        Salva l'immagine matplotlib sulla tensorboard.
+
+        Args:
+            prefix (str): Nome immagine.
+            epoch (int): Epoca.
+        """
+
+        self.writer.add_figure(prefix, self.fig, epoch)
+        plt.close()
