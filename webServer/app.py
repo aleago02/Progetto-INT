@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 app.register_blueprint(views, url_prefix="/")
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'pythonUser'
-app.config['MYSQL_PASSWORD'] = 'pythonPWD'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'ICRISAT'
 mysql.init_app(app)
 

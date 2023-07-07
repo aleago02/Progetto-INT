@@ -13,7 +13,8 @@
         <div id="chart"></div>
     </div>
     <button onclick="window.location.href='http://localhost:8001/table'">Cambia dato</button>
-    <p>Clicca <a href="/{{name}}-Previsione">qui</a> se vuoi provare a prevedere l'andamento del grafico nei prossimi giorni</p>
+    <p>Clicca <a href="/{{name}}-Previsione">qui</a> per avviare l'addestramento e visualizzare la TensorBoard</p>
+    <button onclick="window.location.href = 'http://localhost:6006'">TensorBoard</button>
     <script type="text/javascript" src="{{ url_for('static', filename = 'index.js') }}"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript">

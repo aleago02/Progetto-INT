@@ -1,0 +1,15 @@
+{
+    "type" : "object",
+    "required" : ["hyper_parameters"],
+    "properties" : {
+        "hyper_parameters" : {
+            "type" : "object",
+            "required" : [
+                "window_size",
+                "test_size",
+                "epochs",
+                "learning_rate"
+            ]
+        }
+    }
+}

@@ -1,6 +1,5 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+CREATE DATABASE `icrisat`:
+USE `icrisat`;
 
 CREATE TABLE `sheet1` (
   `Station` varchar(10) DEFAULT NULL,

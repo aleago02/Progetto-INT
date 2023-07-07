@@ -1,0 +1,7 @@
+{"hyper_parameters": {
+        "window_size": 1460,
+        "test_size": 1460,
+        "epochs": 50,
+        "learning_rate": 0.01
+    }
+}

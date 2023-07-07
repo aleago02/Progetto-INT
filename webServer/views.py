@@ -14,8 +14,11 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import datetime as dt
-from net_runner import NetRunner
+from predictions.net_runner import NetRunner
+from predictions.config_helper import check_and_get_configuration
+import subprocess
 
+cfg_obj = check_and_get_configuration('webServer/predictions/config.json', 'webServer/predictions/config_schema.json')
 
 # definisco la funzione per ritornare il grafico dopo avergli passato SQL del valore che voglio plottare 
 def get_grafico(SQL):
@@ -106,7 +109,7 @@ def add_data(data):
     mysql.connection.commit()
     print("caricati")
 
-topic = 'message'
+topic = 'ESP8266_AL'
 msg = []
 
 @mqtt_client.on_connect()
@@ -127,17 +130,16 @@ def handle_mqtt_message(client, userdata, message):
         msg.clear()  
       
     msg.append('{payload}'.format(**data))
-    if 'cfhj' in msg :
-        msg.remove('hello')
         
     print('Received message on topic: {topic} with payload: {payload}'.format(**data))
 
 views = Blueprint(__name__, "views")
 
 # Visualizza il template "index.html" passandogli il 
-# parametro "Pippo" tramite la renderizzazione
 @views.route("/")
 def home():
+    logdir = './runs'
+    subprocess.Popen(['tensorboard', '--logdir', logdir])
     return render_template("index.html")
 
 @views.route('/publish', methods=['GET','POST'])
@@ -177,38 +179,38 @@ def goToGetJson():
 @views.route("/MaxT")
 def MaxT():
    name = 'MaxT'
-   return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, MaxT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"), name=name)
+   return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, MaxT FROM Sheet1"), name=name)
 
 @views.route("/MinT")
 def MinT():
     name = 'MinT'
-    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, MinT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"), name=name)
+    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, MinT FROM Sheet1"), name=name)
 
 @views.route("/RH1")
 def RH1():
     name = 'RH1'
-    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, RH1 FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"),name=name)
+    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, RH1 FROM Sheet1"),name=name)
 
 @views.route("/RH2")
 def RH2():
     name = 'RH2'
-    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, RH2 FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"), name=name)
+    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, RH2 FROM Sheet1"), name=name)
 
 @views.route("/Wind")
 def Wind():
     name = 'Wind'
-    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, Wind FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"),name=name)
+    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, Wind FROM Sheet1"),name=name)
 
 @views.route("/Rain")
 def Rain():
     name = 'Rain'
-    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, Rain FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023' LIMIT 1460"), name=name)
+    return render_template("grafico.html", graphJSON=get_grafico("SELECT Date, Rain FROM Sheet1"), name=name)
 
 # rotta per far vedere la tabella con gli ultimi dieci valori del mio DB 
 @views.route("/table")
 def get_table():
     cursor = mysql.connection.cursor()
-    num = cursor.execute("SELECT * FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'")
+    num = cursor.execute("SELECT * FROM Sheet1")
     return render_template("table.html", number=num)
 
 
@@ -217,40 +219,41 @@ def get_table():
 @views.route("/MaxT-Previsione")
 def MaxTP():
     name = 'MaxT'
-    # graphJSON, testScore=get_previsione("SELECT Date, MaxT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 ", name)
-    graphJSON=runner.fit()
-
+    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 ", name, cfg_ob)
+    runner.fit()
     return redirect('http://localhost:6006')
-
-    # return render_template("previsione.html", graphJSON = graphJSON,testScore = 10, name=name)
 
 @views.route("/MinT-Previsione")
 def MinTP():
     name = 'MinT'
-    graphJSON, testScore=get_previsione("SELECT Date, MinT FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = testScore, name=name)
+    runner = NetRunner("SELECT Date, MinT FROM Sheet1 ", name, cfg_obj)
+    runner.fit()
+    return redirect('http://localhost:6006')
 
 @views.route("/RH1-Previsione")
 def RH1P():
     name = 'RH1'
-    graphJSON, testScore=get_previsione("SELECT Date, RH1 FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = testScore, name=name)
+    runner = NetRunner("SELECT Date, RH1 FROM Sheet1 ", name, cfg_obj)
+    runner.fit()
+    return redirect('http://localhost:6006')
 
 @views.route("/RH2-Previsione")
 def RH2P():
     name = 'RH2'
-    graphJSON, testScore=get_previsione("SELECT Date, RH2 FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = testScore, name=name)
+    runner = NetRunner("SELECT Date, RH2 FROM Sheet1 ", name, cfg_obj)
+    runner.fit()
+    return redirect('http://localhost:6006')
 
 @views.route("/Wind-Previsione")
 def WindP():
     name = 'Wind'
-    graphJSON, testScore=get_previsione("SELECT Date, Wind FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = testScore, name=name)
+    runner = NetRunner("SELECT Date, Wind FROM Sheet1 ", name, cfg_obj)
+    runner.fit()
+    return redirect('http://localhost:6006')
 
 @views.route("/Rain-Previsione")
 def RainP():
     name = 'Rain'
-    graphJSON, testScore=get_previsione("SELECT Date, Rain FROM Sheet1 WHERE Date != '%/%/2022' OR Date != '%/%/2023'", name)
-    return render_template("previsione.html", graphJSON = graphJSON,testScore = testScore, name=name)
+    runner = NetRunner("SELECT Date, Rain FROM Sheet1 ", name, cfg_obj)
+    runner.fit()
+    return redirect('http://localhost:6006')
