@@ -3,9 +3,6 @@ from flask import request, jsonify, redirect, url_for
 from database import mysql
 from flask_mqtt import Mqtt
 from mqtt import mqtt_client
-from sklearn.metrics import r2_score
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
 import json
 import plotly
 import plotly.express as px
@@ -35,39 +32,6 @@ def get_grafico(SQL):
     #  converte una stringa  in json
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
-
-# # defenisco il grafico e l'accuratezza della prvisione per la previsione dei dati passandogli il valore che voglio prevedre l'andamento
-def get_previsione(SQLP, name):
-    cursor = mysql.connection.cursor()
-    cursor.execute(SQLP)
-    row_headers=[x[0] for x in cursor.description]
-    json_data=[]
-    for result in cursor.fetchall():
-        json_data.append(dict(zip(row_headers, result)))
-    #print(json_data)
-    data = pd.DataFrame(json_data)
-    data['Date'] = pd.to_datetime(data['Date'])
-    data['Date']=data['Date'].map(dt.datetime.toordinal)
-    # split data into X and y
-    X = data["Date"].to_numpy()
-    X = X.reshape(-1, 1)
-    y = data[name].to_numpy()
-
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2,random_state=0)
-
-    # bulid and fit the model
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    # prediction for the testing dataset
-    test_pre = model.predict(X_test)
-    test_score = r2_score(y_test, test_pre)
-    fig = px.scatter(data, y_test, test_pre)
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    test_score = test_score * 100
-    test_score = round(test_score, 2)
-    return graphJSON, test_score
 
 def add_data(data):
     cursor = mysql.connection.cursor()
@@ -219,7 +183,7 @@ def get_table():
 @views.route("/MaxT-Previsione")
 def MaxTP():
     name = 'MaxT'
-    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 ", name, cfg_ob)
+    runner = NetRunner("SELECT Date, MaxT FROM Sheet1 ", name, cfg_obj )
     runner.fit()
     return redirect('http://localhost:6006')
 

@@ -34,6 +34,9 @@ class NetRunner():
         self.SQL = SQL
         self.name = name
         
+        if not os.path.exists('./out'):
+            os.mkdir('./out')
+            
         self.runs_path = Path('./runs')
         existing_files = [f for f in os.listdir('./runs') if f.startswith(f'rnn_{self.name}')]
         print(existing_files)
@@ -62,6 +65,9 @@ class NetRunner():
         
         # Procedo al caricamento dei dati in un dataset e, di conseguenza, nel dataloader.
         self.load_data()
+        
+        self.best_loss = float('inf')
+        self.best_model_path = ''
 
     def load_data(self):      
         cursor = mysql.connection.cursor()
@@ -148,6 +154,12 @@ class NetRunner():
             # Calcolo la loss.
             loss_va = self.criterion(torch.tensor(test_predictions[-self.window_size:]), self.test_norm)
             
+            if loss_va < self.best_loss:
+                # Se la loss è migliore del precedente modello, sovrascrivi il modello migliore
+                self.best_loss = loss_va
+                self.best_model_path = f'./out/' + self.name + '_best_model.pth'
+                torch.save(self.net.state_dict(), self.best_model_path)
+            
             upgraded = min_tr_loss > loss and min_va_loss > loss_va
 
             if min_tr_loss > loss:
@@ -165,13 +177,14 @@ class NetRunner():
                 true_predictions = self.scaler.inverse_transform(np.array(test_predictions[self.window_size:]).reshape(-1, 1))
 
                 self.plot_full_data_predictions(true_predictions[:num_predictions], epoch)
+                # self.plot_zoomed_data_predictions(true_predictions[:num_predictions], epoch)
                 
 
             # Stampo:
             # - la loss ottenuta alla fine di ogni epoca sui dati di training    
             # - la loss ottenuta alla fine di ogni epoca sui dati di test    
             print(f'Epoch: {epoch:2} Loss: {loss.item():10.8f} --- Loss_va: {loss_va.item():10.8f} {"*** Upgraded ***" if upgraded else ""}')
-
+            
     def plot_full_data_predictions(self, predictions : np.ndarray, epoch : int):
         """
         Salva su tensorboard un grafico completo di dati e predizioni.
@@ -181,7 +194,7 @@ class NetRunner():
             epoch (int): Epoca associata al plot.
         """
 
-        x = np.arange('1988-01-02', '1992-01-01', dtype='datetime64[D]').astype('datetime64[D]')[-len(predictions):]
+        x = np.arange('1988-01-02', '1992-01-02', dtype='datetime64[D]').astype('datetime64[D]')[-len(predictions):]
 
         
         self.fig = plt.figure(figsize=(12,4))
@@ -193,7 +206,6 @@ class NetRunner():
         plt.plot(x, predictions, color='#ff8000')
         
         self.plot_to_tensorboard(self.name + 'predizione', epoch)
-
 
     def plot_to_tensorboard(self, prefix : str, epoch : int) -> None:
         """

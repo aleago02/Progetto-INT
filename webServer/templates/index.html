@@ -12,7 +12,7 @@
     <article>
         
         <h1>PROGETTO</h1>
-        <p>Implementazione di un server che si connette a un database (Mysql - mariaDB), legge dei dati da un sensore collegato ad un ESP8266 e li invia al server che li carica nel database.</p>
+        <p>Implementazione di un server che si connette a un database (Mysql - mariaDB), legge dei dati da un sensore collegato ad un ESP8266 e li invia al server che li carica nel database e fa una predizione sui dati usando una rete LSTM.</p>
         <img id="diagramma" src="{{ url_for('static', filename = "resource/diagramma.png") }}" alt="diagramma progetto">
         <div class="button">
             <button onclick="window.location.href = 'http://localhost:8001/table';">Valori DB</button>
@@ -39,6 +39,10 @@
                 <li>Wind => Vento (km/h);</li>
                 <li>Rain => Pioggia (mm);</li>
             </ol>
+        </section>
+        <section>
+            <h2>PREDIZIONE</h2>
+            <p>Per la predizione dei dati abbiamo utilizzato PyTorch per creare una rete LSTM.</p>
         </section>
         <section>
             <h2>ESP8266</h2>
